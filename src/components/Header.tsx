@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTaskStore } from '../store';
-import { formatDateLabel, toDateKey } from '../utils';
+import { formatDateLabel, formatDateDDMMYYYY, toDateKey } from '../utils';
 import { ThemeToggle } from './ThemeToggle';
 
 export const Header: React.FC = () => {
@@ -43,6 +43,7 @@ export const Header: React.FC = () => {
                 </button>
                 <div className="header__date-group">
                     <span className="header__date">{formatDateLabel(currentDate)}</span>
+                    <span className="header__date-sub">{formatDateDDMMYYYY(currentDate)}</span>
                     {!isToday && (
                         <button className="header__today-btn" onClick={goToToday}>
                             Go to Today

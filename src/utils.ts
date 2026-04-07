@@ -32,6 +32,14 @@ export function formatDateLabel(dateKey: string): string {
 }
 
 /**
+ * Formats a YYYY-MM-DD date key to DD-MM-YYYY.
+ */
+export function formatDateDDMMYYYY(dateKey: string): string {
+    const [y, m, d] = dateKey.split('-');
+    return `${d}-${m}-${y}`;
+}
+
+/**
  * Generate a unique ID.
  */
 export function generateId(): string {
