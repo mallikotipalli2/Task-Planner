@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { supabase, hashPassword, signToken, verifyToken, cors } from './_helpers';
+from './helpers'
 
 export default async function handler(_req: VercelRequest, res: VercelResponse) {
     cors(res);
