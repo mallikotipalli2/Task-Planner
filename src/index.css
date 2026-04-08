@@ -1085,7 +1085,7 @@ input {
 
 .archive__item {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: var(--space-sm);
     padding: var(--space-sm) var(--space-md);
     background: var(--color-surface);
@@ -1096,10 +1096,10 @@ input {
 .archive__item-check {
     flex-shrink: 0;
     color: var(--color-success);
-    margin-top: 2px;
 }
 
 .archive__item-content {
+    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -1129,7 +1129,6 @@ input {
     color: var(--color-text-muted);
     opacity: 0;
     transition: all 0.15s ease;
-    align-self: center;
 }
 
 .archive__item:hover .archive__item-delete {
