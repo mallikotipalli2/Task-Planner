@@ -1,7 +1,21 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-import type { VercelRequest } from '@vercel/node';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-// Use require() to avoid ESM/CJS interop issues in Vercel's bundler
+// --- Supabase ---
+const supabaseUrl = process.env.SUPABASE_URL ?? '';
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY ?? '';
+
+if (!supabaseUrl || !supabaseKey) {
+    console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_KEY env vars');
+}
+
+export const supabase: SupabaseClient = createClient(
+    supabaseUrl || 'https://placeholder.supabase.co',
+    supabaseKey || 'placeholder'
+);
+
+// --- Auth ---
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -39,7 +53,7 @@ export function getUserFromRequest(req: VercelRequest): JwtPayload | null {
     return verifyToken(header.slice(7));
 }
 
-export function cors(res: import('@vercel/node').VercelResponse) {
+export function cors(res: VercelResponse) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
