@@ -244,17 +244,30 @@ export const useTaskStore = create<TaskStore>((set, get) => {
         },
 
         archiveCompleted: () => {
-            const { tasks, currentDate } = get();
+            const { tasks, currentDate, archivedTasks } = get();
             const completed = tasks.filter((t) => t.completed);
             if (completed.length === 0) return;
             const remaining = tasks.filter((t) => !t.completed);
-            set({ tasks: remaining });
+
+            // Optimistic: update UI immediately
+            const now = new Date().toISOString();
+            const newArchived = completed.map((t) => ({
+                id: t.id,
+                date: currentDate,
+                text: t.text,
+                createdAt: t.createdAt,
+                completedAt: t.completedAt ?? now,
+                archivedAt: now,
+            }));
+            set({ tasks: remaining, archivedTasks: [...newArchived, ...archivedTasks] });
+
+            // Then persist to server
             Promise.all([
                 archiveCompletedTasks(currentDate, completed),
                 saveTasks(currentDate, remaining),
             ]).then(async () => {
-                const archivedTasks = await loadArchivedTasks();
-                set({ archivedTasks });
+                const fresh = await loadArchivedTasks();
+                set({ archivedTasks: fresh });
                 get().refreshWeeklyStats();
             });
         },

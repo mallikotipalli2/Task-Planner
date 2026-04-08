@@ -39,7 +39,7 @@ const App: React.FC = () => {
     useEffect(() => {
         if (!ready || authMode !== 'authenticated') return;
 
-        const interval = setInterval(() => { sync(); }, 30_000);
+        const interval = setInterval(() => { sync(); }, 5_000);
 
         const onVisibility = () => {
             if (document.visibilityState === 'visible') sync();
