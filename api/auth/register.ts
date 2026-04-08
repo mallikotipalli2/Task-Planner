@@ -1,9 +1,18 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { supabase, hashPassword, signToken, cors } from '../_helpers';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+    process.env.SUPABASE_URL || '',
+    process.env.SUPABASE_SERVICE_KEY || ''
+);
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
-        cors(res);
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
         if (req.method === 'OPTIONS') return res.status(204).end();
         if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -18,7 +27,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         const cleanUsername = username.trim().toLowerCase();
 
-        // Check if username exists
         const { data: existing } = await supabase
             .from('users')
             .select('id')
@@ -29,7 +37,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             return res.status(409).json({ error: 'Username already taken' });
         }
 
-        const passwordHash = await hashPassword(password);
+        const passwordHash = await bcrypt.hash(password, 10);
 
         const { data: user, error } = await supabase
             .from('users')
@@ -41,7 +49,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             return res.status(500).json({ error: 'Failed to create account', detail: error?.message });
         }
 
-        const token = signToken({ userId: user.id, username: user.username });
+        const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
+        const token = jwt.sign({ userId: user.id, username: user.username }, JWT_SECRET, { expiresIn: '30d' });
 
         return res.status(201).json({
             token,
