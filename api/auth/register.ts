@@ -1,5 +1,16 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-from '../../lib/helpers.js'
+import { createClient } from '@supabase/supabase-js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+
+const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
+
+function cors(res: VercelResponse) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
@@ -19,16 +30,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const cleanUsername = username.trim().toLowerCase();
 
         const { data: existing } = await supabase
-            .from('users')
-            .select('id')
-            .eq('username', cleanUsername)
-            .single();
+            .from('users').select('id').eq('username', cleanUsername).single();
+        if (existing) return res.status(409).json({ error: 'Username already taken' });
 
-        if (existing) {
-            return res.status(409).json({ error: 'Username already taken' });
-        }
-
-        const passwordHash = await hashPassword(password);
+        const passwordHash = await bcrypt.hash(password, 10);
 
         const { data: user, error } = await supabase
             .from('users')
@@ -36,18 +41,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             .select('id, username, created_at')
             .single();
 
-        if (error || !user) {
-            return res.status(500).json({ error: 'Failed to create account', detail: error?.message });
-        }
+        if (error || !user) return res.status(500).json({ error: 'Failed to create account', detail: error?.message });
 
-        const token = signToken({ userId: user.id, username: user.username });
-
-        return res.status(201).json({
-            token,
-            user: { id: user.id, username: user.username },
-        });
+        const token = jwt.sign({ userId: user.id, username: user.username }, JWT_SECRET, { expiresIn: '30d' });
+        return res.status(201).json({ token, user: { id: user.id, username: user.username } });
     } catch (err: any) {
-        console.error('Register error:', err);
         return res.status(500).json({ error: 'Internal server error', detail: err?.message });
     }
 }
