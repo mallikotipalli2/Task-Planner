@@ -1,6 +1,7 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 // --- Supabase ---
 const supabaseUrl = process.env.SUPABASE_URL ?? '';
@@ -16,9 +17,6 @@ export const supabase: SupabaseClient = createClient(
 );
 
 // --- Auth ---
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 const SALT_ROUNDS = 10;
 

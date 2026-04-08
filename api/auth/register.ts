@@ -1,12 +1,12 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 const supabase = createClient(
     process.env.SUPABASE_URL || '',
     process.env.SUPABASE_SERVICE_KEY || ''
 );
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {

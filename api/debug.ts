@@ -1,5 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 export default async function handler(_req: VercelRequest, res: VercelResponse) {
     const results: Record<string, any> = {};
@@ -14,14 +16,12 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
         results.supabase = 'FAIL: ' + e.message;
     }
     try {
-        const bcrypt = require('bcryptjs');
         const hash = await bcrypt.hash('test', 10);
         results.bcrypt = 'ok: ' + hash.substring(0, 10);
     } catch (e: any) {
         results.bcrypt = 'FAIL: ' + e.message;
     }
     try {
-        const jwt = require('jsonwebtoken');
         const token = jwt.sign({ test: 1 }, 'secret');
         results.jwt = 'ok: ' + token.substring(0, 10);
     } catch (e: any) {
