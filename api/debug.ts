@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-from './helpers'
+from './helpers.js'
 
 export default async function handler(_req: VercelRequest, res: VercelResponse) {
     cors(res);
