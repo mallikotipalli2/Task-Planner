@@ -123,6 +123,40 @@ If same failure occurs twice:
 
 # 🔍 DEBUG-FIRST SYSTEM
 
+# ⚡ DEBUG SWITCH HOOK
+
+Before execution:
+
+IF issue detected:
+→ ENTER DEBUG MODE immediately
+
+IF same issue repeats:
+→ ESCALATE to FORENSIC DEBUG MODE
+
+---
+
+# PRIORITY OVERRIDE
+
+DEBUG MODE overrides:
+- Planner expansion
+- Multi-step execution
+- Broad refactors
+
+Focus becomes:
+ISOLATE → TRACE → FIX → VERIFY
+
+---
+
+# STRICT FLOW
+
+1. Identify failing unit
+2. Add minimal logs
+3. Run once
+4. Lock root cause
+5. Apply minimal fix
+6. Validate
+7. Cleanup
+
 When something fails:
 
 ### Phase 1 — Instrument

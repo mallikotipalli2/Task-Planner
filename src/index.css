@@ -140,6 +140,238 @@ input {
     color: var(--color-text-secondary);
 }
 
+/* ---------- Auth Page ---------- */
+.auth-page {
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-md);
+    background: var(--color-bg);
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 400px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    box-shadow: var(--shadow-lg);
+}
+
+.auth-card__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+    color: var(--color-text);
+    margin-bottom: 4px;
+}
+
+.auth-card__subtitle {
+    font-size: 0.85rem;
+    text-align: center;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-lg);
+}
+
+.auth-card__tabs {
+    display: flex;
+    background: var(--color-surface-hover);
+    border-radius: var(--radius-sm);
+    padding: 3px;
+    margin-bottom: var(--space-lg);
+}
+
+.auth-card__tab {
+    flex: 1;
+    padding: 8px 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    border-radius: 6px;
+    transition: all 0.15s ease;
+}
+
+.auth-card__tab--active {
+    background: var(--color-surface);
+    color: var(--color-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.auth-card__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.auth-card__field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.auth-card__label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+
+.auth-card__input {
+    font-family: inherit;
+    font-size: 0.95rem;
+    padding: 10px 14px;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-text);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.auth-card__input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.auth-card__input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.auth-card__hint {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+}
+
+.auth-card__error {
+    font-size: 0.82rem;
+    color: var(--color-danger);
+    background: rgba(239, 68, 68, 0.08);
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    text-align: center;
+}
+
+.auth-card__submit {
+    padding: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: white;
+    background: var(--color-primary);
+    border-radius: var(--radius-sm);
+    transition: all 0.15s ease;
+}
+
+.auth-card__submit:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+}
+
+.auth-card__submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.auth-card__divider {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin: var(--space-md) 0;
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+}
+
+.auth-card__divider::before,
+.auth-card__divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--color-border);
+}
+
+.auth-card__guest {
+    width: 100%;
+    padding: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    transition: all 0.15s ease;
+}
+
+.auth-card__guest:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+}
+
+.auth-card__guest-hint {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    text-align: center;
+    margin-top: 6px;
+}
+
+/* ---------- Auth Modal (overlay) ---------- */
+.auth-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.15s ease;
+}
+
+.auth-modal {
+    width: 100%;
+    max-width: 380px;
+    margin: var(--space-md);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-lg);
+    animation: fadeIn 0.2s var(--ease-out);
+}
+
+.auth-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.auth-modal__title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.auth-modal__close {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+    transition: all 0.15s ease;
+}
+
+.auth-modal__close:hover {
+    color: var(--color-text);
+    background: var(--color-surface-hover);
+}
+
+.auth-modal__desc {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-md);
+}
+
 /* ---------- Header ---------- */
 .header {
     margin-bottom: var(--space-lg);
@@ -150,6 +382,65 @@ input {
     align-items: center;
     justify-content: space-between;
     margin-bottom: var(--space-md);
+}
+
+.header__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.header__user {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.header__user-badge {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    transition: all 0.15s ease;
+}
+
+.header__user-badge--auth {
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+}
+
+.header__user-badge--guest {
+    color: var(--color-text-secondary);
+    background: var(--color-surface-hover);
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+}
+
+.header__user-badge--guest:hover {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+    background: var(--color-primary-light);
+}
+
+.header__user-arrow {
+    opacity: 0.6;
+}
+
+.header__logout-btn {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    padding: 3px 8px;
+    border-radius: var(--radius-full);
+    transition: all 0.15s ease;
+}
+
+.header__logout-btn:hover {
+    color: var(--color-danger);
+    background: rgba(239, 68, 68, 0.08);
 }
 
 .header__title {

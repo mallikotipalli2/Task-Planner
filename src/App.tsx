@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useTaskStore } from './store';
-import { Header, TaskInput, TaskList, ProgressBar, ProductivityChart, ArchiveView } from './components';
+import { useAuthStore } from './authStore';
+import { Header, TaskInput, TaskList, ProgressBar, ProductivityChart, ArchiveView, AuthPage, AuthModal } from './components';
 
 const App: React.FC = () => {
     const theme = useTaskStore((s) => s.theme);
@@ -10,15 +11,42 @@ const App: React.FC = () => {
     const archivedTasks = useTaskStore((s) => s.archivedTasks);
     const toggleArchiveView = useTaskStore((s) => s.toggleArchiveView);
 
-    // Initialise DB (migrate localStorage → IndexedDB, load tasks)
+    const authMode = useAuthStore((s) => s.mode);
+    const authLoading = useAuthStore((s) => s.loading);
+    const authResolved = useAuthStore((s) => s.resolved);
+    const showAuthModal = useAuthStore((s) => s.showAuthModal);
+    const initAuth = useAuthStore((s) => s.initAuth);
+
+    // Init auth first
     useEffect(() => {
-        init();
-    }, [init]);
+        initAuth();
+    }, [initAuth]);
+
+    // Init (or re-init) task store when auth resolves or mode changes
+    useEffect(() => {
+        if (authResolved) {
+            init();
+        }
+    }, [authResolved, authMode, init]);
 
     // Apply theme to <html> for CSS vars
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
     }, [theme]);
+
+    // Show loading while auth is initialising
+    if (authLoading) {
+        return (
+            <div className="app app--loading">
+                <span className="app__loader">Loading…</span>
+            </div>
+        );
+    }
+
+    // Show auth page until user picks login or guest
+    if (!authResolved) {
+        return <AuthPage />;
+    }
 
     if (!ready) {
         return (
@@ -32,6 +60,7 @@ const App: React.FC = () => {
         return (
             <div className="app">
                 <ArchiveView />
+                {showAuthModal && <AuthModal />}
             </div>
         );
     }
@@ -55,6 +84,7 @@ const App: React.FC = () => {
                 </button>
             </div>
             <ProductivityChart />
+            {showAuthModal && <AuthModal />}
         </div>
     );
 };

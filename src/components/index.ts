@@ -8,3 +8,5 @@ export { ThemeToggle } from './ThemeToggle';
 export { EmptyState } from './EmptyState';
 export { ProductivityChart } from './ProductivityChart';
 export { ArchiveView } from './ArchiveView';
+export { AuthPage } from './AuthPage';
+export { AuthModal } from './AuthModal';

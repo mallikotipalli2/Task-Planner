@@ -2,18 +2,68 @@ import { create } from 'zustand';
 import type { Task } from './types';
 import type { ArchivedTaskRecord } from './db';
 import {
-    loadTasks,
-    saveTasks,
+    loadTasks as localLoadTasks,
+    saveTasks as localSaveTasks,
     loadTheme,
     saveTheme,
-    loadAllTasksInRange,
-    archiveCompletedTasks,
-    loadArchivedTasks,
-    deleteArchivedTask,
-    clearAllArchived,
+    loadAllTasksInRange as localLoadAllTasksInRange,
+    archiveCompletedTasks as localArchiveCompleted,
+    loadArchivedTasks as localLoadArchivedTasks,
+    deleteArchivedTask as localDeleteArchivedTask,
+    clearAllArchived as localClearAllArchived,
     migrateFromLocalStorage,
 } from './storage';
+import {
+    cloudLoadTasks,
+    cloudSaveTasks,
+    cloudLoadAllTasksInRange,
+    cloudArchiveCompleted,
+    cloudLoadArchivedTasks,
+    cloudDeleteArchivedTask,
+    cloudClearAllArchived,
+    type CloudArchivedTask,
+} from './cloudStorage';
 import { toDateKey, generateId } from './utils';
+
+function isAuthenticated(): boolean {
+    return !!localStorage.getItem('taskplanner:token');
+}
+
+// Unified storage functions that route to local or cloud
+async function loadTasks(dateKey: string): Promise<Task[]> {
+    if (isAuthenticated()) return cloudLoadTasks(dateKey);
+    return localLoadTasks(dateKey);
+}
+
+async function saveTasks(dateKey: string, tasks: Task[]): Promise<void> {
+    if (isAuthenticated()) return cloudSaveTasks(dateKey, tasks);
+    return localSaveTasks(dateKey, tasks);
+}
+
+async function loadAllTasksInRange(start: string, end: string) {
+    if (isAuthenticated()) return cloudLoadAllTasksInRange(start, end);
+    return localLoadAllTasksInRange(start, end);
+}
+
+async function archiveCompletedTasks(dateKey: string, tasks: Task[]) {
+    if (isAuthenticated()) return cloudArchiveCompleted(dateKey, tasks);
+    return localArchiveCompleted(dateKey, tasks);
+}
+
+async function loadArchivedTasks(): Promise<(ArchivedTaskRecord | CloudArchivedTask)[]> {
+    if (isAuthenticated()) return cloudLoadArchivedTasks();
+    return localLoadArchivedTasks();
+}
+
+async function deleteArchivedTask(id: string) {
+    if (isAuthenticated()) return cloudDeleteArchivedTask(id);
+    return localDeleteArchivedTask(id);
+}
+
+async function clearAllArchived() {
+    if (isAuthenticated()) return cloudClearAllArchived();
+    return localClearAllArchived();
+}
 
 export interface DayStat {
     date: string;
@@ -31,7 +81,7 @@ interface TaskStore {
 
     // Archive state
     showArchive: boolean;
-    archivedTasks: ArchivedTaskRecord[];
+    archivedTasks: (ArchivedTaskRecord | CloudArchivedTask)[];
 
     // Init
     init: () => Promise<void>;
@@ -114,7 +164,9 @@ export const useTaskStore = create<TaskStore>((set, get) => {
         archivedTasks: [],
 
         init: async () => {
-            await migrateFromLocalStorage();
+            if (!isAuthenticated()) {
+                await migrateFromLocalStorage();
+            }
             const tasks = await loadTasks(initialDate);
             const weeklyStats = await computeWeeklyStats();
             const archivedTasks = await loadArchivedTasks();

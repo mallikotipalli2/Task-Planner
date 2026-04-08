@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTaskStore } from '../store';
+import { useAuthStore } from '../authStore';
 import { formatDateLabel, formatDateDDMMYYYY, toDateKey } from '../utils';
 import { ThemeToggle } from './ThemeToggle';
 
@@ -8,6 +9,11 @@ export const Header: React.FC = () => {
     const setDate = useTaskStore((s) => s.setDate);
     const today = toDateKey();
     const isToday = currentDate === today;
+
+    const authMode = useAuthStore((s) => s.mode);
+    const user = useAuthStore((s) => s.user);
+    const logout = useAuthStore((s) => s.logout);
+    const openAuthModal = useAuthStore((s) => s.openAuthModal);
 
     const goToPrevDay = () => {
         const d = new Date(currentDate + 'T00:00:00');
@@ -29,7 +35,38 @@ export const Header: React.FC = () => {
         <header className="header">
             <div className="header__top">
                 <h1 className="header__title">Daily Planner</h1>
-                <ThemeToggle />
+                <div className="header__actions">
+                    {authMode === 'authenticated' ? (
+                        <div className="header__user">
+                            <span className="header__user-badge header__user-badge--auth">
+                                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                                    <circle cx="8" cy="5" r="3" stroke="currentColor" strokeWidth="1.5" />
+                                    <path d="M2 14c0-3.3 2.7-5 6-5s6 1.7 6 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                                </svg>
+                                {user?.username}
+                            </span>
+                            <button className="header__logout-btn" onClick={logout}>
+                                Logout
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            className="header__user-badge header__user-badge--guest"
+                            onClick={openAuthModal}
+                            title="Click to login or register"
+                        >
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                                <circle cx="8" cy="5" r="3" stroke="currentColor" strokeWidth="1.5" />
+                                <path d="M2 14c0-3.3 2.7-5 6-5s6 1.7 6 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                            </svg>
+                            Guest
+                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true" className="header__user-arrow">
+                                <path d="M3 4l2 2 2-2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </button>
+                    )}
+                    <ThemeToggle />
+                </div>
             </div>
             <div className="header__nav">
                 <button
