@@ -1,18 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createClient } from '@supabase/supabase-js';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-
-const supabase = createClient(
-    process.env.SUPABASE_URL || '',
-    process.env.SUPABASE_SERVICE_KEY || ''
-);
+import { supabase, hashPassword, signToken, cors } from '../_helpers';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+        cors(res);
         if (req.method === 'OPTIONS') return res.status(204).end();
         if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -37,7 +28,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             return res.status(409).json({ error: 'Username already taken' });
         }
 
-        const passwordHash = await bcrypt.hash(password, 10);
+        const passwordHash = await hashPassword(password);
 
         const { data: user, error } = await supabase
             .from('users')
@@ -49,8 +40,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             return res.status(500).json({ error: 'Failed to create account', detail: error?.message });
         }
 
-        const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
-        const token = jwt.sign({ userId: user.id, username: user.username }, JWT_SECRET, { expiresIn: '30d' });
+        const token = signToken({ userId: user.id, username: user.username });
 
         return res.status(201).json({
             token,

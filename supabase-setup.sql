@@ -39,6 +39,13 @@ CREATE TABLE IF NOT EXISTS archived_tasks (
 CREATE INDEX IF NOT EXISTS idx_archived_user_date ON archived_tasks(user_id, date);
 
 -- ============================================================
+-- Disable Row Level Security (our API routes handle auth via JWT)
+-- ============================================================
+ALTER TABLE users DISABLE ROW LEVEL SECURITY;
+ALTER TABLE tasks DISABLE ROW LEVEL SECURITY;
+ALTER TABLE archived_tasks DISABLE ROW LEVEL SECURITY;
+
+-- ============================================================
 -- Grant access to Supabase roles (anon + authenticated)
 -- Required so the API routes can access tables via the REST API
 -- Security is handled at the application layer (our own JWT auth)
