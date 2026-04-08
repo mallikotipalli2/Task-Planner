@@ -7,6 +7,7 @@ const App: React.FC = () => {
     const theme = useTaskStore((s) => s.theme);
     const ready = useTaskStore((s) => s.ready);
     const init = useTaskStore((s) => s.init);
+    const sync = useTaskStore((s) => s.sync);
     const showArchive = useTaskStore((s) => s.showArchive);
     const archivedTasks = useTaskStore((s) => s.archivedTasks);
     const toggleArchiveView = useTaskStore((s) => s.toggleArchiveView);
@@ -33,6 +34,23 @@ const App: React.FC = () => {
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
     }, [theme]);
+
+    // Auto-sync: poll every 30s + refresh on tab focus (authenticated users only)
+    useEffect(() => {
+        if (!ready || authMode !== 'authenticated') return;
+
+        const interval = setInterval(() => { sync(); }, 30_000);
+
+        const onVisibility = () => {
+            if (document.visibilityState === 'visible') sync();
+        };
+        document.addEventListener('visibilitychange', onVisibility);
+
+        return () => {
+            clearInterval(interval);
+            document.removeEventListener('visibilitychange', onVisibility);
+        };
+    }, [ready, authMode, sync]);
 
     // Show loading while auth is initialising
     if (authLoading) {

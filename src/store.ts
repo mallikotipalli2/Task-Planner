@@ -108,6 +108,9 @@ interface TaskStore {
 
     // Stats
     refreshWeeklyStats: () => Promise<void>;
+
+    // Sync (re-fetch current date tasks + archive from server)
+    sync: () => Promise<void>;
 }
 
 function getInitialTheme(): 'light' | 'dark' {
@@ -249,7 +252,11 @@ export const useTaskStore = create<TaskStore>((set, get) => {
             Promise.all([
                 archiveCompletedTasks(currentDate, completed),
                 saveTasks(currentDate, remaining),
-            ]).then(() => get().refreshWeeklyStats());
+            ]).then(async () => {
+                const archivedTasks = await loadArchivedTasks();
+                set({ archivedTasks });
+                get().refreshWeeklyStats();
+            });
         },
 
         toggleArchiveView: () => {
@@ -290,6 +297,16 @@ export const useTaskStore = create<TaskStore>((set, get) => {
         refreshWeeklyStats: async () => {
             const weeklyStats = await computeWeeklyStats();
             set({ weeklyStats });
+        },
+
+        sync: async () => {
+            const { currentDate } = get();
+            const [tasks, archivedTasks, weeklyStats] = await Promise.all([
+                loadTasks(currentDate),
+                loadArchivedTasks(),
+                computeWeeklyStats(),
+            ]);
+            set({ tasks, archivedTasks, weeklyStats });
         },
     };
 });
