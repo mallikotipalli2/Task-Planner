@@ -6,3 +6,4 @@ export { SortableTaskItem } from './SortableTaskItem';
 export { ProgressBar } from './ProgressBar';
 export { ThemeToggle } from './ThemeToggle';
 export { EmptyState } from './EmptyState';
+export { ProductivityChart } from './ProductivityChart';

@@ -1,13 +1,31 @@
 import { create } from 'zustand';
 import type { Task } from './types';
-import { loadTasks, saveTasks, loadTheme, saveTheme } from './storage';
+import {
+    loadTasks,
+    saveTasks,
+    loadTheme,
+    saveTheme,
+    loadTasksInRange,
+    migrateFromLocalStorage,
+} from './storage';
 import { toDateKey, generateId } from './utils';
+
+export interface DayStat {
+    date: string;
+    total: number;
+    completed: number;
+}
 
 interface TaskStore {
     // State
     currentDate: string;
     tasks: Task[];
     theme: 'light' | 'dark';
+    ready: boolean;
+    weeklyStats: DayStat[];
+
+    // Init
+    init: () => Promise<void>;
 
     // Task actions
     addTask: (text: string) => void;
@@ -22,6 +40,9 @@ interface TaskStore {
 
     // Theme
     toggleTheme: () => void;
+
+    // Stats
+    refreshWeeklyStats: () => Promise<void>;
 }
 
 function getInitialTheme(): 'light' | 'dark' {
@@ -33,15 +54,54 @@ function getInitialTheme(): 'light' | 'dark' {
     return 'light';
 }
 
+function getWeekRange(): { start: string; end: string } {
+    const today = new Date();
+    const start = new Date(today);
+    start.setDate(today.getDate() - 6);
+    return { start: toDateKey(start), end: toDateKey(today) };
+}
+
+async function computeWeeklyStats(): Promise<DayStat[]> {
+    const { start, end } = getWeekRange();
+    const records = await loadTasksInRange(start, end);
+
+    const map = new Map<string, { total: number; completed: number }>();
+    // Pre-populate all 7 days
+    const d = new Date(start + 'T00:00:00');
+    const endDate = new Date(end + 'T00:00:00');
+    while (d <= endDate) {
+        map.set(toDateKey(d), { total: 0, completed: 0 });
+        d.setDate(d.getDate() + 1);
+    }
+    for (const r of records) {
+        const entry = map.get(r.date) ?? { total: 0, completed: 0 };
+        entry.total++;
+        if (r.completed) entry.completed++;
+        map.set(r.date, entry);
+    }
+    return Array.from(map.entries()).map(([date, stat]) => ({
+        date,
+        ...stat,
+    }));
+}
+
 export const useTaskStore = create<TaskStore>((set, get) => {
     const initialDate = toDateKey();
-    const initialTasks = loadTasks(initialDate);
     const initialTheme = getInitialTheme();
 
     return {
         currentDate: initialDate,
-        tasks: initialTasks,
+        tasks: [],
         theme: initialTheme,
+        ready: false,
+        weeklyStats: [],
+
+        init: async () => {
+            await migrateFromLocalStorage();
+            const tasks = await loadTasks(initialDate);
+            const weeklyStats = await computeWeeklyStats();
+            set({ tasks, ready: true, weeklyStats });
+        },
 
         addTask: (text: string) => {
             const trimmed = text.trim();
@@ -61,6 +121,7 @@ export const useTaskStore = create<TaskStore>((set, get) => {
             const updated = [...tasks, newTask];
             saveTasks(currentDate, updated);
             set({ tasks: updated });
+            get().refreshWeeklyStats();
         },
 
         toggleTask: (id: string) => {
@@ -76,6 +137,7 @@ export const useTaskStore = create<TaskStore>((set, get) => {
             );
             saveTasks(currentDate, updated);
             set({ tasks: updated });
+            get().refreshWeeklyStats();
         },
 
         updateTask: (id: string, text: string) => {
@@ -93,6 +155,7 @@ export const useTaskStore = create<TaskStore>((set, get) => {
             const updated = tasks.filter((t) => t.id !== id);
             saveTasks(currentDate, updated);
             set({ tasks: updated });
+            get().refreshWeeklyStats();
         },
 
         reorderTasks: (activeId: string, overId: string) => {
@@ -115,10 +178,11 @@ export const useTaskStore = create<TaskStore>((set, get) => {
             const updated = tasks.filter((t) => !t.completed);
             saveTasks(currentDate, updated);
             set({ tasks: updated });
+            get().refreshWeeklyStats();
         },
 
-        setDate: (date: string) => {
-            const tasks = loadTasks(date);
+        setDate: async (date: string) => {
+            const tasks = await loadTasks(date);
             set({ currentDate: date, tasks });
         },
 
@@ -126,6 +190,11 @@ export const useTaskStore = create<TaskStore>((set, get) => {
             const next = get().theme === 'light' ? 'dark' : 'light';
             saveTheme(next);
             set({ theme: next });
+        },
+
+        refreshWeeklyStats: async () => {
+            const weeklyStats = await computeWeeklyStats();
+            set({ weeklyStats });
         },
     };
 });
