@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useTaskStore } from './store';
 import { useAuthStore } from './authStore';
-import { Header, TaskInput, TaskList, ProgressBar, ProductivityChart, ArchiveView, AuthPage, AuthModal } from './components';
+import { Header, TaskInput, TaskList, ProgressBar, ProductivityChart, ArchiveView, AuthPage, AuthModal, ProfileModal } from './components';
 
 const App: React.FC = () => {
     const theme = useTaskStore((s) => s.theme);
@@ -16,6 +16,7 @@ const App: React.FC = () => {
     const authLoading = useAuthStore((s) => s.loading);
     const authResolved = useAuthStore((s) => s.resolved);
     const showAuthModal = useAuthStore((s) => s.showAuthModal);
+    const showProfileModal = useAuthStore((s) => s.showProfileModal);
     const initAuth = useAuthStore((s) => s.initAuth);
 
     // Init auth first
@@ -79,6 +80,7 @@ const App: React.FC = () => {
             <div className="app">
                 <ArchiveView />
                 {showAuthModal && <AuthModal />}
+                {showProfileModal && <ProfileModal />}
             </div>
         );
     }
@@ -103,6 +105,7 @@ const App: React.FC = () => {
             </div>
             <ProductivityChart />
             {showAuthModal && <AuthModal />}
+            {showProfileModal && <ProfileModal />}
         </div>
     );
 };

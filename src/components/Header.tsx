@@ -12,8 +12,8 @@ export const Header: React.FC = () => {
 
     const authMode = useAuthStore((s) => s.mode);
     const user = useAuthStore((s) => s.user);
-    const logout = useAuthStore((s) => s.logout);
     const openAuthModal = useAuthStore((s) => s.openAuthModal);
+    const openProfileModal = useAuthStore((s) => s.openProfileModal);
 
     const goToPrevDay = () => {
         const d = new Date(currentDate + 'T00:00:00');
@@ -37,18 +37,17 @@ export const Header: React.FC = () => {
                 <h1 className="header__title">Daily Planner</h1>
                 <div className="header__actions">
                     {authMode === 'authenticated' ? (
-                        <div className="header__user">
-                            <span className="header__user-badge header__user-badge--auth">
-                                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                                    <circle cx="8" cy="5" r="3" stroke="currentColor" strokeWidth="1.5" />
-                                    <path d="M2 14c0-3.3 2.7-5 6-5s6 1.7 6 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                                </svg>
-                                {user?.username}
-                            </span>
-                            <button className="header__logout-btn" onClick={logout}>
-                                Logout
-                            </button>
-                        </div>
+                        <button
+                            className="header__user-badge header__user-badge--auth"
+                            onClick={openProfileModal}
+                            title="Open profile"
+                        >
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                                <circle cx="8" cy="5" r="3" stroke="currentColor" strokeWidth="1.5" />
+                                <path d="M2 14c0-3.3 2.7-5 6-5s6 1.7 6 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                            </svg>
+                            {user?.username}
+                        </button>
                     ) : (
                         <button
                             className="header__user-badge header__user-badge--guest"

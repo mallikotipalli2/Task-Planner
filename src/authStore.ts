@@ -3,6 +3,7 @@ import {
     apiRegister,
     apiLogin,
     apiGetMe,
+    apiChangePassword,
     type AuthUser,
 } from './cloudStorage';
 
@@ -18,6 +19,8 @@ interface AuthStore {
     error: string | null;
     resolved: boolean;
     showAuthModal: boolean;
+    showProfileModal: boolean;
+    profileSuccess: string | null;
 
     initAuth: () => Promise<void>;
     login: (username: string, password: string) => Promise<void>;
@@ -27,6 +30,9 @@ interface AuthStore {
     clearError: () => void;
     openAuthModal: () => void;
     closeAuthModal: () => void;
+    openProfileModal: () => void;
+    closeProfileModal: () => void;
+    changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
@@ -36,6 +42,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
     error: null,
     resolved: false,
     showAuthModal: false,
+    showProfileModal: false,
+    profileSuccess: null,
 
     initAuth: async () => {
         const token = localStorage.getItem(TOKEN_KEY);
@@ -97,4 +105,16 @@ export const useAuthStore = create<AuthStore>((set) => ({
     clearError: () => set({ error: null }),
     openAuthModal: () => set({ showAuthModal: true, error: null }),
     closeAuthModal: () => set({ showAuthModal: false, error: null }),
+    openProfileModal: () => set({ showProfileModal: true, error: null, profileSuccess: null }),
+    closeProfileModal: () => set({ showProfileModal: false, error: null, profileSuccess: null }),
+
+    changePassword: async (currentPassword: string, newPassword: string) => {
+        set({ error: null, loading: true, profileSuccess: null });
+        try {
+            await apiChangePassword(currentPassword, newPassword);
+            set({ loading: false, profileSuccess: 'Password changed successfully!' });
+        } catch (e: any) {
+            set({ error: e.message || 'Failed to change password', loading: false });
+        }
+    },
 }));

@@ -372,6 +372,89 @@ input {
     margin-bottom: var(--space-md);
 }
 
+/* ---------- Profile Modal ---------- */
+.profile-modal__user {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: var(--color-surface-hover);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--space-md);
+}
+
+.profile-modal__avatar {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+    flex-shrink: 0;
+}
+
+.profile-modal__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.profile-modal__username {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.profile-modal__label {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+}
+
+.profile-modal__section {
+    margin-bottom: var(--space-md);
+}
+
+.profile-modal__section-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-sm);
+}
+
+.profile-modal__success {
+    font-size: 0.78rem;
+    color: var(--color-success);
+    padding: 8px 12px;
+    background: rgba(34, 197, 94, 0.08);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.profile-modal__footer {
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-md);
+    display: flex;
+    justify-content: center;
+}
+
+.profile-modal__logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--color-danger);
+    padding: 8px 20px;
+    border-radius: var(--radius-sm);
+    transition: all 0.15s ease;
+}
+
+.profile-modal__logout-btn:hover {
+    background: rgba(239, 68, 68, 0.08);
+}
+
 /* ---------- Header ---------- */
 .header {
     margin-bottom: var(--space-lg);
@@ -410,6 +493,11 @@ input {
 .header__user-badge--auth {
     color: var(--color-primary);
     background: var(--color-primary-light);
+    cursor: pointer;
+}
+
+.header__user-badge--auth:hover {
+    opacity: 0.85;
 }
 
 .header__user-badge--guest {
@@ -427,20 +515,6 @@ input {
 
 .header__user-arrow {
     opacity: 0.6;
-}
-
-.header__logout-btn {
-    font-size: 0.7rem;
-    font-weight: 500;
-    color: var(--color-text-muted);
-    padding: 3px 8px;
-    border-radius: var(--radius-full);
-    transition: all 0.15s ease;
-}
-
-.header__logout-btn:hover {
-    color: var(--color-danger);
-    background: rgba(239, 68, 68, 0.08);
 }
 
 .header__title {

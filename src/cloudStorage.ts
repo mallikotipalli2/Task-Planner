@@ -56,6 +56,13 @@ export async function apiGetMe(): Promise<{ user: AuthUser }> {
     return apiFetch('/auth/me');
 }
 
+export async function apiChangePassword(currentPassword: string, newPassword: string): Promise<{ ok: boolean }> {
+    return apiFetch('/auth/change-password', {
+        method: 'POST',
+        body: JSON.stringify({ currentPassword, newPassword }),
+    });
+}
+
 /* ── Tasks ── */
 
 export async function cloudLoadTasks(dateKey: string): Promise<Task[]> {

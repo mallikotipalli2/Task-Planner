@@ -10,3 +10,4 @@ export { ProductivityChart } from './ProductivityChart';
 export { ArchiveView } from './ArchiveView';
 export { AuthPage } from './AuthPage';
 export { AuthModal } from './AuthModal';
+export { ProfileModal } from './ProfileModal';
