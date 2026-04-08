@@ -1,6 +1,10 @@
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
+import _jwt from 'jsonwebtoken';
+import _bcrypt from 'bcryptjs';
 import type { VercelRequest } from '@vercel/node';
+
+// Handle ESM/CJS interop in Vercel's bundler
+const bcrypt = (_bcrypt as any).default || _bcrypt;
+const jwt = (_jwt as any).default || _jwt;
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 const SALT_ROUNDS = 10;
