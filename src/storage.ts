@@ -1,5 +1,5 @@
 import type { Task } from './types';
-import { db, type TaskRecord } from './db';
+import { db, type TaskRecord, type ArchivedTaskRecord } from './db';
 
 const STORAGE_PREFIX = 'taskplanner';
 const THEME_KEY = `${STORAGE_PREFIX}:theme`;
@@ -80,18 +80,101 @@ export async function saveTasks(dateKey: string, tasks: Task[]): Promise<void> {
 
 /**
  * Load tasks for a date range (inclusive). Used by charts.
+ * Includes both active and archived tasks for accurate stats.
  */
-export async function loadTasksInRange(
+export async function loadAllTasksInRange(
     startDate: string,
     endDate: string
-): Promise<TaskRecord[]> {
+): Promise<{ date: string; completed: boolean }[]> {
     try {
-        return await db.tasks
+        const active = await db.tasks
             .where('date')
             .between(startDate, endDate, true, true)
             .toArray();
+
+        const archived = await db.archivedTasks
+            .where('date')
+            .between(startDate, endDate, true, true)
+            .toArray();
+
+        const activeMapped = active.map((r) => ({
+            date: r.date,
+            completed: r.completed,
+        }));
+
+        const archivedMapped = archived.map((r) => ({
+            date: r.date,
+            completed: true,
+        }));
+
+        return [...activeMapped, ...archivedMapped];
     } catch {
         return [];
+    }
+}
+
+/* ── Archive ── */
+
+/**
+ * Archive completed tasks for a given date.
+ * Moves them from `tasks` to `archivedTasks`.
+ */
+export async function archiveCompletedTasks(
+    dateKey: string,
+    completedTasks: Task[]
+): Promise<void> {
+    const now = new Date().toISOString();
+    const archiveRecords: ArchivedTaskRecord[] = completedTasks.map((t) => ({
+        id: t.id,
+        date: dateKey,
+        text: t.text,
+        createdAt: t.createdAt,
+        completedAt: t.completedAt ?? now,
+        archivedAt: now,
+    }));
+
+    try {
+        await db.transaction('rw', db.tasks, db.archivedTasks, async () => {
+            const idsToRemove = completedTasks.map((t) => t.id);
+            await db.tasks.bulkDelete(idsToRemove);
+            await db.archivedTasks.bulkPut(archiveRecords);
+        });
+    } catch {
+        console.warn('Failed to archive tasks');
+    }
+}
+
+/**
+ * Load all archived tasks, newest first.
+ */
+export async function loadArchivedTasks(): Promise<ArchivedTaskRecord[]> {
+    try {
+        const all = await db.archivedTasks.toArray();
+        return all.sort((a, b) => b.archivedAt.localeCompare(a.archivedAt));
+    } catch {
+        return [];
+    }
+}
+
+/**
+ * Delete a single archived task by id.
+ */
+export async function deleteArchivedTask(id: string): Promise<void> {
+    try {
+        await db.archivedTasks.delete(id);
+    } catch {
+        console.warn('Failed to delete archived task');
+    }
+}
+
+/**
+ * Clear all archived tasks permanently.
+ */
+export async function clearAllArchived(): Promise<void> {
+    try {
+        await db.archivedTasks.clear();
+    } catch {
+        console.warn('Failed to clear archived tasks');
     }
 }
 

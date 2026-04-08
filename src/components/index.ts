@@ -7,3 +7,4 @@ export { ProgressBar } from './ProgressBar';
 export { ThemeToggle } from './ThemeToggle';
 export { EmptyState } from './EmptyState';
 export { ProductivityChart } from './ProductivityChart';
+export { ArchiveView } from './ArchiveView';

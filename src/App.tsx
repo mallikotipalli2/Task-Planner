@@ -1,11 +1,14 @@
 import React, { useEffect } from 'react';
 import { useTaskStore } from './store';
-import { Header, TaskInput, TaskList, ProgressBar, ProductivityChart } from './components';
+import { Header, TaskInput, TaskList, ProgressBar, ProductivityChart, ArchiveView } from './components';
 
 const App: React.FC = () => {
     const theme = useTaskStore((s) => s.theme);
     const ready = useTaskStore((s) => s.ready);
     const init = useTaskStore((s) => s.init);
+    const showArchive = useTaskStore((s) => s.showArchive);
+    const archivedTasks = useTaskStore((s) => s.archivedTasks);
+    const toggleArchiveView = useTaskStore((s) => s.toggleArchiveView);
 
     // Initialise DB (migrate localStorage → IndexedDB, load tasks)
     useEffect(() => {
@@ -25,12 +28,32 @@ const App: React.FC = () => {
         );
     }
 
+    if (showArchive) {
+        return (
+            <div className="app">
+                <ArchiveView />
+            </div>
+        );
+    }
+
     return (
         <div className="app">
             <Header />
             <TaskInput />
             <ProgressBar />
             <TaskList />
+            <div className="app__footer">
+                <button
+                    className={`app__archive-link ${archivedTasks.length > 0 ? 'app__archive-link--active' : ''}`}
+                    onClick={toggleArchiveView}
+                    aria-label="View archived tasks"
+                >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                        <path d="M2 4h12M3 4v9a1 1 0 001 1h8a1 1 0 001-1V4M6 7h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    View Archive{archivedTasks.length > 0 ? ` (${archivedTasks.length})` : ''}
+                </button>
+            </div>
             <ProductivityChart />
         </div>
     );

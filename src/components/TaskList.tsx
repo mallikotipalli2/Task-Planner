@@ -74,11 +74,14 @@ export const TaskList: React.FC = () => {
                             Completed ({completed.length})
                         </span>
                         <button
-                            className="task-list__clear-btn"
-                            onClick={() => useTaskStore.getState().clearCompleted()}
-                            aria-label="Clear completed tasks"
+                            className="task-list__archive-btn"
+                            onClick={() => useTaskStore.getState().archiveCompleted()}
+                            aria-label="Archive completed tasks"
                         >
-                            Clear
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                                <path d="M2 4h12M3 4v9a1 1 0 001 1h8a1 1 0 001-1V4M6 7h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            Archive
                         </button>
                     </div>
                     <div className="task-list__items" role="list" aria-label="Completed tasks">

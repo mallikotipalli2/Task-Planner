@@ -234,17 +234,19 @@ input {
 }
 
 /* ---------- Task Input ---------- */
+.task-input-wrapper {
+    margin-bottom: var(--space-lg);
+}
+
 .task-input {
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
     background: var(--color-surface);
     border: 1.5px solid var(--color-border);
     border-radius: var(--radius-md);
-    padding: var(--space-sm) var(--space-md);
-    box-shadow: var(--shadow-sm);
+    padding: 0;
+    overflow: hidden;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    margin-bottom: var(--space-md);
 }
 
 .task-input:focus-within {
@@ -254,8 +256,8 @@ input {
 
 .task-input__field {
     flex: 1;
-    font-size: 0.95rem;
-    padding: var(--space-sm) 0;
+    font-size: 1rem;
+    padding: 14px 16px;
     background: transparent;
 }
 
@@ -264,26 +266,46 @@ input {
 }
 
 .task-input__btn {
-    width: 36px;
-    height: 36px;
+    width: 48px;
+    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: var(--radius-sm);
+    flex-shrink: 0;
     background: var(--color-primary);
     color: white;
-    flex-shrink: 0;
-    transition: all 0.15s ease;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    margin: -1px -1px -1px 0;
+    transition: background 0.15s ease;
 }
 
-.task-input__btn:hover:not(:disabled) {
+.task-input__btn:hover {
     background: var(--color-primary-hover);
-    transform: scale(1.04);
 }
 
-.task-input__btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
+.task-input__btn:active {
+    transform: scale(0.95);
+}
+
+.task-input__hint {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.72rem;
+    color: var(--color-text-muted);
+    text-align: right;
+    animation: fadeIn 0.2s ease;
+}
+
+.task-input__hint kbd {
+    display: inline-block;
+    font-family: inherit;
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 1px 5px;
+    background: var(--color-surface-hover);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    color: var(--color-text-secondary);
 }
 
 /* ---------- Progress Bar ---------- */
@@ -348,18 +370,21 @@ input {
     color: var(--color-text-muted);
 }
 
-.task-list__clear-btn {
+.task-list__archive-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
     font-size: 0.75rem;
     font-weight: 500;
-    color: var(--color-danger);
+    color: var(--color-primary);
     padding: 2px 10px;
     border-radius: var(--radius-full);
     transition: all 0.15s ease;
 }
 
-.task-list__clear-btn:hover {
-    background: rgba(239, 68, 68, 0.1);
-    color: var(--color-danger-hover);
+.task-list__archive-btn:hover {
+    background: var(--color-primary-light);
+    color: var(--color-primary-hover);
 }
 
 .task-list__items {
@@ -460,8 +485,15 @@ input {
 }
 
 /* Text */
-.task-item__text {
+.task-item__content {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.task-item__text {
     font-size: 0.95rem;
     line-height: 1.4;
     cursor: default;
@@ -472,6 +504,12 @@ input {
 .task-item--completed .task-item__text {
     text-decoration: line-through;
     color: var(--color-text-muted);
+}
+
+.task-item__created {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    line-height: 1.2;
 }
 
 /* Edit input */
@@ -648,6 +686,168 @@ input {
         max-width: 560px;
         padding: var(--space-lg) var(--space-md);
     }
+}
+
+/* ---------- App Footer ---------- */
+.app__footer {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--space-lg);
+}
+
+.app__archive-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    padding: 6px 16px;
+    border-radius: var(--radius-full);
+    transition: all 0.15s ease;
+}
+
+.app__archive-link:hover {
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+}
+
+.app__archive-link--active {
+    color: var(--color-primary);
+    font-weight: 600;
+    background: var(--color-primary-light);
+}
+
+/* ---------- Archive View ---------- */
+.archive {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.archive__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.archive__back-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    transition: all 0.15s ease;
+}
+
+.archive__back-btn:hover {
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+}
+
+.archive__title {
+    flex: 1;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.archive__clear-btn {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--color-danger);
+    padding: 4px 14px;
+    border-radius: var(--radius-full);
+    transition: all 0.15s ease;
+}
+
+.archive__clear-btn:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--color-danger-hover);
+}
+
+.archive__empty {
+    text-align: center;
+    padding: var(--space-2xl) var(--space-md);
+}
+
+.archive__empty-text {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: 4px;
+}
+
+.archive__empty-sub {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+
+.archive__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.archive__item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+}
+
+.archive__item-check {
+    flex-shrink: 0;
+    color: var(--color-success);
+    margin-top: 2px;
+}
+
+.archive__item-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.archive__item-text {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    text-decoration: line-through;
+    word-break: break-word;
+}
+
+.archive__item-meta {
+    font-size: 0.72rem;
+    color: var(--color-text-muted);
+}
+
+.archive__item-delete {
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+    opacity: 0;
+    transition: all 0.15s ease;
+    align-self: center;
+}
+
+.archive__item:hover .archive__item-delete {
+    opacity: 1;
+}
+
+.archive__item-delete:hover {
+    color: var(--color-danger);
+    background: rgba(239, 68, 68, 0.08);
 }
 
 /* ---------- Productivity Chart ---------- */

@@ -109,15 +109,20 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, dragHandleProps, isDra
                     aria-label="Edit task"
                 />
             ) : (
-                <span
-                    className="task-item__text"
-                    onDoubleClick={() => {
-                        if (!task.completed) setIsEditing(true);
-                    }}
-                    title="Double-click to edit"
-                >
-                    {task.text}
-                </span>
+                <div className="task-item__content">
+                    <span
+                        className="task-item__text"
+                        onDoubleClick={() => {
+                            if (!task.completed) setIsEditing(true);
+                        }}
+                        title="Double-click to edit"
+                    >
+                        {task.text}
+                    </span>
+                    <span className="task-item__created">
+                        Created {new Date(task.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                </div>
             )}
 
             {/* Delete */}

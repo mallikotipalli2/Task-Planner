@@ -1,11 +1,16 @@
 import { create } from 'zustand';
 import type { Task } from './types';
+import type { ArchivedTaskRecord } from './db';
 import {
     loadTasks,
     saveTasks,
     loadTheme,
     saveTheme,
-    loadTasksInRange,
+    loadAllTasksInRange,
+    archiveCompletedTasks,
+    loadArchivedTasks,
+    deleteArchivedTask,
+    clearAllArchived,
     migrateFromLocalStorage,
 } from './storage';
 import { toDateKey, generateId } from './utils';
@@ -24,6 +29,10 @@ interface TaskStore {
     ready: boolean;
     weeklyStats: DayStat[];
 
+    // Archive state
+    showArchive: boolean;
+    archivedTasks: ArchivedTaskRecord[];
+
     // Init
     init: () => Promise<void>;
 
@@ -33,7 +42,13 @@ interface TaskStore {
     updateTask: (id: string, text: string) => void;
     deleteTask: (id: string) => void;
     reorderTasks: (activeId: string, overId: string) => void;
-    clearCompleted: () => void;
+    archiveCompleted: () => void;
+
+    // Archive actions
+    toggleArchiveView: () => void;
+    loadArchive: () => Promise<void>;
+    deleteArchivedItem: (id: string) => Promise<void>;
+    clearArchive: () => Promise<void>;
 
     // Navigation
     setDate: (date: string) => void;
@@ -63,7 +78,7 @@ function getWeekRange(): { start: string; end: string } {
 
 async function computeWeeklyStats(): Promise<DayStat[]> {
     const { start, end } = getWeekRange();
-    const records = await loadTasksInRange(start, end);
+    const records = await loadAllTasksInRange(start, end);
 
     const map = new Map<string, { total: number; completed: number }>();
     // Pre-populate all 7 days
@@ -95,12 +110,15 @@ export const useTaskStore = create<TaskStore>((set, get) => {
         theme: initialTheme,
         ready: false,
         weeklyStats: [],
+        showArchive: false,
+        archivedTasks: [],
 
         init: async () => {
             await migrateFromLocalStorage();
             const tasks = await loadTasks(initialDate);
             const weeklyStats = await computeWeeklyStats();
-            set({ tasks, ready: true, weeklyStats });
+            const archivedTasks = await loadArchivedTasks();
+            set({ tasks, ready: true, weeklyStats, archivedTasks });
         },
 
         addTask: (text: string) => {
@@ -119,9 +137,8 @@ export const useTaskStore = create<TaskStore>((set, get) => {
             };
 
             const updated = [...tasks, newTask];
-            saveTasks(currentDate, updated);
             set({ tasks: updated });
-            get().refreshWeeklyStats();
+            saveTasks(currentDate, updated).then(() => get().refreshWeeklyStats());
         },
 
         toggleTask: (id: string) => {
@@ -135,9 +152,8 @@ export const useTaskStore = create<TaskStore>((set, get) => {
                     }
                     : t
             );
-            saveTasks(currentDate, updated);
             set({ tasks: updated });
-            get().refreshWeeklyStats();
+            saveTasks(currentDate, updated).then(() => get().refreshWeeklyStats());
         },
 
         updateTask: (id: string, text: string) => {
@@ -153,9 +169,8 @@ export const useTaskStore = create<TaskStore>((set, get) => {
         deleteTask: (id: string) => {
             const { tasks, currentDate } = get();
             const updated = tasks.filter((t) => t.id !== id);
-            saveTasks(currentDate, updated);
             set({ tasks: updated });
-            get().refreshWeeklyStats();
+            saveTasks(currentDate, updated).then(() => get().refreshWeeklyStats());
         },
 
         reorderTasks: (activeId: string, overId: string) => {
@@ -173,11 +188,39 @@ export const useTaskStore = create<TaskStore>((set, get) => {
             set({ tasks: updated });
         },
 
-        clearCompleted: () => {
+        archiveCompleted: () => {
             const { tasks, currentDate } = get();
-            const updated = tasks.filter((t) => !t.completed);
-            saveTasks(currentDate, updated);
-            set({ tasks: updated });
+            const completed = tasks.filter((t) => t.completed);
+            if (completed.length === 0) return;
+            const remaining = tasks.filter((t) => !t.completed);
+            set({ tasks: remaining });
+            Promise.all([
+                archiveCompletedTasks(currentDate, completed),
+                saveTasks(currentDate, remaining),
+            ]).then(() => get().refreshWeeklyStats());
+        },
+
+        toggleArchiveView: () => {
+            const next = !get().showArchive;
+            set({ showArchive: next });
+            if (next) get().loadArchive();
+        },
+
+        loadArchive: async () => {
+            const archivedTasks = await loadArchivedTasks();
+            set({ archivedTasks });
+        },
+
+        deleteArchivedItem: async (id: string) => {
+            await deleteArchivedTask(id);
+            const archivedTasks = get().archivedTasks.filter((t) => t.id !== id);
+            set({ archivedTasks });
+            get().refreshWeeklyStats();
+        },
+
+        clearArchive: async () => {
+            await clearAllArchived();
+            set({ archivedTasks: [] });
             get().refreshWeeklyStats();
         },
 
