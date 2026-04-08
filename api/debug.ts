@@ -2,17 +2,30 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 
 export default async function handler(_req: VercelRequest, res: VercelResponse) {
+    const results: Record<string, any> = {};
     try {
         const supabase = createClient(
             process.env.SUPABASE_URL || '',
             process.env.SUPABASE_SERVICE_KEY || ''
         );
         const { data, error } = await supabase.from('users').select('id').limit(1);
-        res.status(200).json({
-            supabase: 'ok',
-            query: error ? 'ERROR: ' + error.message : 'ok, rows: ' + (data?.length ?? 0)
-        });
+        results.supabase = error ? 'ERROR: ' + error.message : 'ok, rows: ' + (data?.length ?? 0);
     } catch (e: any) {
-        res.status(500).json({ error: e.message });
+        results.supabase = 'FAIL: ' + e.message;
     }
+    try {
+        const bcrypt = require('bcryptjs');
+        const hash = await bcrypt.hash('test', 10);
+        results.bcrypt = 'ok: ' + hash.substring(0, 10);
+    } catch (e: any) {
+        results.bcrypt = 'FAIL: ' + e.message;
+    }
+    try {
+        const jwt = require('jsonwebtoken');
+        const token = jwt.sign({ test: 1 }, 'secret');
+        results.jwt = 'ok: ' + token.substring(0, 10);
+    } catch (e: any) {
+        results.jwt = 'FAIL: ' + e.message;
+    }
+    res.status(200).json(results);
 }
